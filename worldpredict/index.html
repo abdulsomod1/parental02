@@ -3,108 +3,43 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sign Up - WorldPredict</title>
-  <!-- Inline manifest data to bypass file:// CORS/ERR_FAILED -->
-  <script id="manifest-data" type="application/manifest+json">{"name":"WorldPredict","short_name":"WorldPredict","description":"Predict world events and challenge your foresight!","start_url":"./index.html","display":"standalone","background_color":"#0a0a2e","theme_color":"#00d4ff","icons":[{"src":"data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDE5MiAxOTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxjaXJjbGUgY3g9Ijk2IiBjeT0iOTYiIHI9Ijk2IiBmaWxsPSIjMDBkNGZmIi8+CjxjaXJjbGUgY3g9Ijk2IiBjeT0iOTYiIHI9Ijc0IiBzdHJva2U9IiMwYTBhMmUiIHN0cm9rZS13aWR0aD0iNCIgZmlsbD0ibm9uZSIvPgo8L3N2Zz4K","sizes":"192x192","type":"image/svg+xml"},{"src":"data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgdmlld0JveD0iMCAwIDUxMiA1MTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxjaXJjbGUgY3g9IjI1NiIgY3k9IjI1NiIgcj0iMjU2IiBmaWxsPSIjMDBkNGZmIi8+CjxjaXJjbGUgY3g9IjI1NiIgY3k9IjI1NiIgcj0iMTk4IiBzdHJva2U9IiMwYTBhMmUiIHN0cm9rZS13aWR0aD0iMTAiIGZpbGw9Im5vbmUiLz4KPC9zdmc+Cg==","sizes":"512x512","type":"image/svg+xml"}]}</script>
+  <title>WorldPredict - Predict the Future!</title>
+  <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="assets/css/styles.css">
   <meta name="theme-color" content="#0a0a2e">
 </head>
 <body>
   <div class="container">
-    <div class="form-container">
-      <h2 class="neon-glow">Create Account</h2>
-      <form id="signupForm">
-        <div class="form-group">
-          <label for="username">Username</label>
-          <input type="text" id="username" required placeholder="Enter username (add @parent for parent account)">
-        </div>
-        <div class="form-group">
-          <label for="email">Email</label>
-          <input type="email" id="email" required placeholder="your@email.com">
-        </div>
-        <div class="form-group">
-          <label for="password">Password</label>
-          <input type="password" id="password" required minlength="6">
-        </div>
-        <div class="form-group" id="childCodeGroup" style="display: none;">
-          <label for="childCode">Child Code (for parents)</label>
-          <input type="text" id="childCode" placeholder="Enter 8-char child code">
-        </div>
-        <button type="submit" class="btn btn-primary w-full">Sign Up 🚀</button>
-      </form>
-      <p style="text-align: center; margin-top: 20px;">
-        Already have account? <a href="login.html" class="neon-text">Login</a>
-      </p>
-      <div id="message"></div>
+    <header class="hero">
+      <h1 class="neon-glow">🌍 WorldPredict</h1>
+      <p class="subtitle neon">Challenge your foresight. Predict world events!</p>
+    </header>
+    
+    <div class="cta-buttons">
+      <a href="signup.html" class="btn btn-primary btn-large">🚀 Start Predicting</a>
+      <a href="login.html" class="btn btn-secondary btn-large">Login</a>
+    </div>
+    
+    <div class="features">
+      <div class="feature-card">
+        <h3>🎮 Game-like Interface</h3>
+        <p>Fun predictions about real world events</p>
+      </div>
+      <div class="feature-card">
+        <h3>👨‍👩‍👦 Parental Controls</h3>
+        <p>Parents monitor child activity</p>
+      </div>
+      <div class="feature-card">
+        <h3>📱 Works Offline</h3>
+        <p>PWA - install and use anywhere</p>
+      </div>
     </div>
   </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="assets/js/auth.js"></script>
+  
   <script>
-    // Wait for auth.js to fully load and init
-    let authReady = false;
-    window.addEventListener('load', async () => {
-      // Wait for supabase init
-      let attempts = 0;
-      while (!window.supabase && attempts < 20) {
-        await new Promise(r => setTimeout(r, 100));
-        attempts++;
-      }
-      authReady = !!window.signup;
-      console.log('Auth ready:', authReady);
-    });
-
-    // Fixed manifest - use standard link (server resolves)
-    const link = document.createElement('link');
-    link.rel = 'manifest';
-    link.href = './manifest.json';
-    document.head.appendChild(link);
-
-    document.addEventListener('DOMContentLoaded', () => {
-      document.getElementById('username').addEventListener('input', function(e) {
-        const val = e.target.value;
-        const group = document.getElementById('childCodeGroup');
-        group.style.display = val.includes('@parent') ? 'block' : 'none';
-      });
-
-      document.getElementById('signupForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const username = document.getElementById('username').value;
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
-        const childCode = document.getElementById('childCode').value;
-
-        const role = username.includes('@parent') ? 'parent' : 'user';
-        
-        // Check if signup is available
-        if (typeof window.signup !== 'function') {
-          showMessage('Auth system not ready. Please wait or refresh.', 'error');
-          console.error('window.signup not available');
-          return;
-        }
-        
-        try {
-          const result = await window.signup(username, email, password, role, childCode);
-          showMessage('Account created! Redirecting...', 'success');
-          setTimeout(() => {
-            if (role === 'user') window.location.href = 'user-dashboard.html';
-            else window.location.href = 'parent-dashboard.html';
-          }, 1500);
-        } catch (error) {
-          console.error('Signup failed:', error);
-          showMessage(error.message || 'Signup failed. Please try again.', 'error');
-        }
-      });
-
-      window.showMessage = function(text, type) {
-        const msg = document.getElementById('message');
-        msg.textContent = text;
-        msg.className = `alert alert-${type}`;
-      };
-    });
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js');
+    }
   </script>
-
 </body>
 </html>
-

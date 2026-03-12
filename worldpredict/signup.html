@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Up - WorldPredict</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <meta name="theme-color" content="#0a0a2e">
+</head>
+<body>
+  <div class="container">
+    <div class="form-container">
+      <h2 class="neon-glow">Create Account</h2>
+      <form id="signupForm">
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input type="text" id="username" required placeholder="Enter username (add @parent for parent account)">
+        </div>
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" required placeholder="your@email.com">
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" required minlength="6">
+        </div>
+        <div class="form-group" id="childCodeGroup" style="display: none;">
+          <label for="childCode">Child Code (for parents)</label>
+          <input type="text" id="childCode" placeholder="Enter 8-char child code">
+        </div>
+        <button type="submit" class="btn btn-primary w-full">Sign Up 🚀</button>
+      </form>
+      <p style="text-align: center; margin-top: 20px;">
+        Already have account? <a href="login.html" class="neon-text">Login</a>
+      </p>
+      <div id="message"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/js/auth.js"></script>
+  <script>
+    document.getElementById('username').addEventListener('input', function(e) {
+      const val = e.target.value;
+      const group = document.getElementById('childCodeGroup');
+      group.style.display = val.includes('@parent') ? 'block' : 'none';
+    });
+
+    document.getElementById('signupForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const username = document.getElementById('username').value;
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const childCode = document.getElementById('childCode').value;
+
+      const role = username.includes('@parent') ? 'parent' : 'user';
+      
+      try {
+        const result = await signup(username, email, password, role, childCode);
+        showMessage('Account created! Redirecting...', 'success');
+        setTimeout(() => {
+          if (role === 'user') window.location.href = 'user-dashboard.html';
+          else window.location.href = 'parent-dashboard.html';
+        }, 1500);
+      } catch (error) {
+        showMessage(error.message, 'error');
+      }
+    });
+
+function showMessage(text, type) {
+  const msg = document.getElementById('message');
+  msg.textContent = text;
+  msg.className = `alert alert-${type}`;
+}
+  </script>
+</body>
+</html>

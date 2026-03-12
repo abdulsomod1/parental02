@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Parent Dashboard - WorldPredict</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <meta name="theme-color" content="#0a0a2e">
+</head>
+<body>
+  <div class="container">
+    <div class="dashboard-header">
+      <h1 class="neon-glow">👨‍👩‍👦 Parent Control</h1>
+      <div>
+        <span id="parentInfo"></span>
+        <button id="parentLogout" class="btn btn-secondary">Logout</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>🔗 Linked Child</h3>
+      <div id="childInfo">
+        <p>No child linked yet. Use child_code during signup.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>📜 Child Predictions</h3>
+      <div id="childPredictions" class="prediction-list"></div>
+    </div>
+
+    <div class="card">
+      <h3>📊 Activity Logs</h3>
+      <div id="activityLogs"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/predictions.js"></script>
+  <script src="assets/js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      await initApp();
+      if (!currentUser || currentUser.role !== 'parent') return window.location.href = 'login.html';
+      
+      document.getElementById('parentInfo').textContent = `Parent: ${currentUser.username}`;
+      loadChildData();
+      loadChildPredictions();
+      loadActivityLogs();
+      
+      document.getElementById('parentLogout').addEventListener('click', logout);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - WorldPredict</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <meta name="theme-color" content="#0a0a2e">
+</head>
+<body>
+  <div class="container">
+    <div class="form-container">
+      <h2 class="neon-glow">Welcome Back</h2>
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="loginEmail">Email</label>
+          <input type="email" id="loginEmail" required>
+        </div>
+        <div class="form-group">
+          <label for="loginPassword">Password</label>
+          <input type="password" id="loginPassword" required>
+        </div>
+        <button type="submit" class="btn btn-primary w-full">Login 🔐</button>
+      </form>
+      <p style="text-align: center; margin-top: 20px;">
+        New user? <a href="signup.html" class="neon-text">Sign Up</a>
+      </p>
+      <div id="loginMessage"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/js/auth.js"></script>
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value;
+      const password = document.getElementById('loginPassword').value;
+      
+      try {
+        const { role } = await login(email, password);
+        document.getElementById('loginMessage').innerHTML = '<div class="alert alert-success">Logged in! Redirecting...</div>';
+        setTimeout(() => {
+          if (role === 'user') window.location.href = 'user-dashboard.html';
+          else window.location.href = 'parent-dashboard.html';
+        }, 1000);
+      } catch (error) {
+        document.getElementById('loginMessage').innerHTML = `<div class="alert alert-error">${error.message}</div>`;
+      }
+    });
+  </script>
+</body>
+</html>
+.w-full { width: 100%; }
+.neon-text { color: var(--neon-blue); text-decoration: none; }
+.neon-text:hover { text-shadow: var(--border-glow); }

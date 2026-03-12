@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Dashboard - WorldPredict</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <meta name="theme-color" content="#0a0a2e">
+</head>
+<body>
+  <div class="container">
+    <div class="dashboard-header">
+      <h1 class="neon-glow">🎮 Prediction Arena</h1>
+      <div>
+        <span id="userInfo"></span>
+        <button id="logoutBtn" class="btn btn-secondary">Logout</button>
+      </div>
+    </div>
+
+    <div class="leaderboard">
+      <h3>🏆 Leaderboard</h3>
+      <div id="leaderboardList"></div>
+    </div>
+
+    <div class="card">
+      <h3>💭 New Prediction</h3>
+      <form id="predictionForm">
+        <div class="form-group">
+          <label for="topic">Topic</label>
+          <input type="text" id="topic" required placeholder="e.g., Will it rain tomorrow?">
+        </div>
+        <div class="form-group">
+          <label for="prediction">Your Prediction</label>
+          <textarea id="prediction" required rows="3" placeholder="Yes / No / Details..."></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit Prediction 🚀</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <h3>📜 Your Predictions</h3>
+      <div id="predictionsList" class="prediction-list"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/predictions.js"></script>
+  <script src="assets/js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      await initApp();
+      if (!currentUser) return window.location.href = 'login.html';
+      
+      document.getElementById('userInfo').textContent = `Welcome, ${currentUser.user_metadata?.username || 'Predictor'}`;
+      
+      loadUserPredictions();
+      loadLeaderboard();
+      
+      document.getElementById('predictionForm').addEventListener('submit', handlePredictionSubmit);
+      document.getElementById('logoutBtn').addEventListener('click', logout);
+    });
+
+    async function handlePredictionSubmit(e) {
+      e.preventDefault();
+      const topic = document.getElementById('topic').value;
+      const prediction = document.getElementById('prediction').value;
+      
+      try {
+        await createPrediction(topic, prediction);
+        showMessage('Prediction saved!', 'success');
+        loadUserPredictions();
+        document.getElementById('predictionForm').reset();
+      } catch (err) {
+        showMessage(err.message, 'error');
+      }
+    }
+  </script>
+</body>
+</html>

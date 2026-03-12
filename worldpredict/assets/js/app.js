@@ -1,18 +1,23 @@
-// App utilities and simple SPA routing
+// App utilities and simple SPA routing - uses global auth from auth.js
 
-// Import Supabase (CDN handled in HTML)
-
-
-let currentUser = null;
+let currentUser = window.currentUser || null;
 
 async function initApp() {
-  await getCurrentUser();
+  if (typeof window.getCurrentUser === 'function') {
+    currentUser = await window.getCurrentUser();
+  }
 }
 
 async function getCurrentUser() {
-  const { data: { session } } = await supabase.auth.getSession();
+  if (!window.supabase) {
+    console.warn('Supabase not ready');
+    return null;
+  }
+  const { data: { session } } = await window.supabase.auth.getSession();
   if (session) {
-    currentUser = await getUserProfile(session.user.id); // from auth.js
+    if (typeof window.getUserProfile === 'function') {
+      currentUser = await window.getUserProfile(session.user.id);
+    }
   }
   return currentUser;
 }
@@ -27,8 +32,16 @@ function router(path) {
   // Netlify handles most routing
 }
 
-// Auto-protect dashboards
-if (window.location.pathname.includes('dashboard') && !currentUser) {
-  window.location.href = 'login.html';
-}
+// Auto-protect dashboards (async check)
+(async () => {
+  if (window.location.pathname.includes('dashboard')) {
+    await getCurrentUser();
+    if (!currentUser) {
+      window.location.href = 'login.html';
+    }
+  }
+})();
+
+// Auto init app
+initApp();
 

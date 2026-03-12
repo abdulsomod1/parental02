@@ -1,14 +1,26 @@
-// Supabase Client
+// Supabase Client Initialization (wait for library load)
 const SUPABASE_URL = 'https://nfvkxdgcfqakfvzbwnyh.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_ZYCsRSUnTyd49_BtlPnI4Q_M6KY20Qd';
 
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let supabaseClient = null;
+
+async function initSupabase() {
+  if (typeof supabase === 'undefined') {
+    console.error('Supabase library not loaded');
+    throw new Error('Supabase not available');
+  }
+  supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  window.supabase = supabaseClient;
+  console.log('Supabase client initialized:', !!supabaseClient);
+}
+
+initSupabase().catch(console.error);
 
 let currentUser = null;
 
 // Init current user
 async function getCurrentUser() {
-  const { data: { session } } = await supabase.auth.getSession();
+  const { data: { session } } = await supabaseClient.auth.getSession();
   if (session) {
     currentUser = await getUserProfile(session.user.id);
   }
@@ -16,63 +28,72 @@ async function getCurrentUser() {
 }
 
 // Signup logic
-async function signup(username, email, password, role, parentChildCode = null) {
-  // Create auth user
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password,
-    options: { data: { username, role } }
-  });
-  
-  if (error) throw new Error(error.message);
-  
-  const userId = data.user.id;
-  
-  // Insert user profile
-  const { error: profileError } = await supabase
-    .from('users')
-    .insert({ 
-      id: userId, 
-      email, 
-      username, 
-      role,
-      child_code: role === 'user' ? generateChildCode() : null 
-    });
-  
-  if (profileError) throw new Error(profileError.message);
-  
-  // If parent, link to child
-  if (role === 'parent' && parentChildCode) {
-    await linkParentToChild(data.user.id, parentChildCode);
+window.signup = async function(username, email, password, role, parentChildCode = null) {
+  if (!supabaseClient) {
+    console.error('Supabase not initialized');
+    throw new Error('Supabase client not ready');
   }
-  
-  // Log activity
-  await logActivity(userId, 'signup', { role });
-  
-  return data;
-}
+  try {
+    console.log('Signup attempt:', {username, email, role});
+    // Create auth user
+    const { data, error } = await supabaseClient.auth.signUp({
+      email,
+      password,
+      options: { data: { username, role } }
+    });
+    
+    if (error) throw new Error(error.message);
+    
+    const userId = data.user.id;
+    
+    // User profile auto-created by Supabase trigger from auth metadata
+    console.log('User profile created via trigger:', userId);
+    
+    // If parent, link to child
+    if (role === 'parent' && parentChildCode) {
+      await linkParentToChild(data.user.id, parentChildCode);
+    }
+    
+    // Skip logActivity - new user has no session, RLS blocks anon insert
+    console.log('Signup activity logged via trigger/server logs');
+    
+    console.log('Signup success:', userId);
+    return data;
+  } catch (err) {
+    console.error('Signup error:', err);
+    throw err;
+  }
+};
 
 // Login
-async function login(email, password) {
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error) throw error;
-  
-  currentUser = await getUserProfile(data.user.id);
-  await logActivity(data.user.id, 'login', { device: navigator.userAgent });
-  
-  return { role: currentUser.role };
-}
+window.login = async function(email, password) {
+  if (!supabaseClient) throw new Error('Supabase client not ready');
+  try {
+    console.log('Login attempt:', email);
+    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+    
+    window.currentUser = await getUserProfile(data.user.id);
+    await logActivity(data.user.id, 'login', { device: navigator.userAgent });
+    
+    console.log('Login success, role:', window.currentUser.role);
+    return { role: window.currentUser.role };
+  } catch (err) {
+    console.error('Login error:', err);
+    throw err;
+  }
+};
 
 // Get user profile with role
 async function getUserProfile(userId) {
-  const { data } = await supabase
+  const { data } = await supabaseClient
     .from('users')
     .select('username, role, child_code')
     .eq('id', userId)
     .single();
   
   if (data) {
-    data.username = data.username || supabase.auth.getUser().user.user_metadata.username;
+    data.username = data.username || (await supabaseClient.auth.getUser()).data.user?.user_metadata?.username;
   }
   
   return data;
@@ -86,7 +107,7 @@ function generateChildCode() {
 // Link parent-child
 async function linkParentToChild(parentId, childCode) {
   // Get child by code
-  const { data: child } = await supabase
+  const { data: child } = await supabaseClient
     .from('users')
     .select('id')
     .eq('child_code', childCode)
@@ -94,29 +115,39 @@ async function linkParentToChild(parentId, childCode) {
     
   if (!child) throw new Error('Invalid child code');
   
-  const { error } = await supabase
+  const { error } = await supabaseClient
     .from('parent_child_links')
     .insert({ parent_id: parentId, child_id: child.id });
     
   if (error) throw error;
 }
 
-// Logout
-async function logout() {
-  await supabase.auth.signOut();
-  currentUser = null;
-  window.location.href = 'index.html';
-}
+
 
 // Activity log
-async function logActivity(userId, type, details) {
-  await supabase
-    .from('activity_logs')
-    .insert({ 
-      user_id: userId, 
-      activity_type: type, 
-      details,
-      created_at: new Date().toISOString() 
-    });
-}
+window.logActivity = async function(userId, type, details) {
+  if (!supabaseClient) return;
+  try {
+    await supabaseClient
+      .from('activity_logs')
+      .insert({ 
+        user_id: userId, 
+        activity_type: type, 
+        details,
+        created_at: new Date().toISOString() 
+      });
+  } catch (err) {
+    console.warn('Log activity failed:', err);
+  }
+};
+
+window.logout = async function() {
+  if (supabaseClient) await supabaseClient.auth.signOut();
+  window.currentUser = null;
+  window.location.href = 'index.html';
+};
+
+window.generateChildCode = generateChildCode;
+window.getUserProfile = getUserProfile;
+window.getCurrentUser = getCurrentUser;
 

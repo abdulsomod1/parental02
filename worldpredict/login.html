@@ -33,20 +33,39 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="assets/js/auth.js"></script>
   <script>
+    // Wait for auth ready
+    let loginReady = false;
+    const checkLoginReady = async () => {
+      let attempts = 0;
+      while (typeof window.login !== 'function' && attempts < 20) {
+        await new Promise(r => setTimeout(r, 100));
+        attempts++;
+      }
+      loginReady = !!window.login;
+      console.log('Login ready:', loginReady);
+    };
+    await checkLoginReady();
+
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
+      if (!loginReady) {
+        document.getElementById('loginMessage').innerHTML = '<div class="alert alert-error">Auth system loading...</div>';
+        return;
+      }
+      
       const email = document.getElementById('loginEmail').value;
       const password = document.getElementById('loginPassword').value;
       
       try {
-        const { role } = await login(email, password);
+        const { role } = await window.login(email, password);
         document.getElementById('loginMessage').innerHTML = '<div class="alert alert-success">Logged in! Redirecting...</div>';
         setTimeout(() => {
           if (role === 'user') window.location.href = 'user-dashboard.html';
           else window.location.href = 'parent-dashboard.html';
         }, 1000);
       } catch (error) {
-        document.getElementById('loginMessage').innerHTML = `<div class="alert alert-error">${error.message}</div>`;
+        console.error('Login failed:', error);
+        document.getElementById('loginMessage').innerHTML = `<div class="alert alert-error">${error.message || 'Login failed'}</div>`;
       }
     });
   </script>

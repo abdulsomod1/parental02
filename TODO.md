@@ -1,59 +1,43 @@
-# WorldPredict PWA Development TODO
+# Fix Signup Error: Cannot read properties of undefined (reading 'signUp')
 
-## Status: [0/18] Complete
+## Status: In Progress
 
-### 1. Create project structure and root files [✅]
-   - worldpredict/index.html (landing)
-   - worldpredict/netlify.toml
-   - worldpredict/README.md (setup/deploy)
+### [x] Step 1: Analysis & Plan Approval
+- Analyzed signup.html, auth.js, app.js, login.html
+- Identified root cause: supabase undefined (CDN/file:// issue)
+- Plan confirmed by user
 
-### 2. Create PWA essentials [✅]
-   - worldpredict/manifest.json
-   - worldpredict/sw.js (service worker)
+### [x] Step 2: Update auth.js
+- Robust client init at top
+- window.supabase, window.signup, window.login etc. with checks/logging
+- All functions use supabaseClient consistently
 
-### 3. Create auth pages [✅]
-   - worldpredict/signup.html
-   - worldpredict/login.html
+### [x] Step 3: Update signup.html
+- Added window.signup check + load wait logic
 
-### 4. Create dashboard pages [✅]
-   - worldpredict/user-dashboard.html
-   - worldpredict/parent-dashboard.html
+### [x] Step 4: Fix app.js
+- Use global window.auth functions/client
+- Async dashboard protection
 
-### 5. Create CSS [✅]
-   - worldpredict/assets/css/styles.css
+### [ ] Step 5: Update login.html (minor)
+- Added window.login check
 
-### 6. Create JS modules [✅]
-   - worldpredict/assets/js/app.js (routing/utils)
-   - worldpredict/assets/js/auth.js (Supabase auth)
-   - worldpredict/assets/js/predictions.js (DB ops)
+### [ ] Step 3: Update signup.html
+- Defer inline script
+- Availability checks
 
-### 7. Create Supabase setup [✅]
-   - Fixed: schema-fixed.sql, rls-fixed.sql, leaderboard-rpc.sql
+### [ ] Step 4: Fix app.js
+- Use global auth functions/client
 
-### 8. Create config [✅]
-   - worldpredict/.env.example
+### [ ] Step 5: Update login.html (minor)
+- Consistent messaging
 
-### 9. Test local: open index.html [ ]
+### [ ] Step 6: Test
+- Run simple-server.bat
+- Test signup flow
+- Check console
 
-### 10. User: Run Supabase SQL [ ]
-
-### 11. Test auth flows [ ]
-
-### 12. Test user dashboard (predictions) [ ]
-
-### 13. Test parent link/dashboard [ ]
-
-### 14. Test PWA install/offline [ ]
-
-### 15. Deploy to Netlify [ ]
-
-### 16. Post-deploy tests [ ]
-
-### 17. Add activity logging tests [ ]
-
-### 18. Complete! [ ]
-
-**Next: Implement plan - fixing schema/RLS/JS bugs for steps 7-8**
-
-**Notes:** Update status as steps complete. Supabase URL: https://nfvkxdgcfqakfvzbwnyh.supabase.co, anon key: sb_publishable_ZYCsRSUnTyd49_BtlPnI4Q_M6KY20Qd
+### [ ] Step 7: Completion
+- Update this file with results
+- attempt_completion
 

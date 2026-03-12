@@ -2,7 +2,7 @@
   "name": "WorldPredict",
   "short_name": "WorldPredict",
   "description": "Predict world events and challenge your foresight!",
-  "start_url": "/",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0a0a2e",
   "theme_color": "#00d4ff",

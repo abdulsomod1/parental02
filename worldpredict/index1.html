@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WorldPredict - Predict the Future!</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <meta name="theme-color" content="#0a0a2e">
+</head>
+<body>
+  <div class="container">
+    <header class="hero">
+      <h1 class="neon-glow">🌍 WorldPredict</h1>
+      <p class="subtitle neon">Challenge your foresight. Predict world events!</p>
+    </header>
+    
+    <div class="cta-buttons">
+      <a href="signup.html" class="btn btn-primary btn-large">🚀 Start Predicting</a>
+      <a href="login.html" class="btn btn-secondary btn-large">Login</a>
+    </div>
+    
+    <div class="features">
+      <div class="feature-card">
+        <h3>🎮 Game-like Interface</h3>
+        <p>Fun predictions about real world events</p>
+      </div>
+      <div class="feature-card">
+        <h3>👨‍👩‍👦 Parental Controls</h3>
+        <p>Parents monitor child activity</p>
+      </div>
+      <div class="feature-card">
+        <h3>📱 Works Offline</h3>
+        <p>PWA - install and use anywhere</p>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js');
+    }
+  </script>
+</body>
+</html>

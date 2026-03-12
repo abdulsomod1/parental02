@@ -41,38 +41,41 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="assets/js/auth.js"></script>
   <script>
-    document.getElementById('username').addEventListener('input', function(e) {
-      const val = e.target.value;
-      const group = document.getElementById('childCodeGroup');
-      group.style.display = val.includes('@parent') ? 'block' : 'none';
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('username').addEventListener('input', function(e) {
+        const val = e.target.value;
+        const group = document.getElementById('childCodeGroup');
+        group.style.display = val.includes('@parent') ? 'block' : 'none';
+      });
+
+      document.getElementById('signupForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const username = document.getElementById('username').value;
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const childCode = document.getElementById('childCode').value;
+
+        const role = username.includes('@parent') ? 'parent' : 'user';
+        
+        try {
+          const result = await signup(username, email, password, role, childCode);
+          showMessage('Account created! Redirecting...', 'success');
+          setTimeout(() => {
+            if (role === 'user') window.location.href = 'user-dashboard.html';
+            else window.location.href = 'parent-dashboard.html';
+          }, 1500);
+        } catch (error) {
+          showMessage(error.message, 'error');
+        }
+      });
+
+      window.showMessage = function(text, type) {
+        const msg = document.getElementById('message');
+        msg.textContent = text;
+        msg.className = `alert alert-${type}`;
+      };
     });
-
-    document.getElementById('signupForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const username = document.getElementById('username').value;
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-      const childCode = document.getElementById('childCode').value;
-
-      const role = username.includes('@parent') ? 'parent' : 'user';
-      
-      try {
-        const result = await signup(username, email, password, role, childCode);
-        showMessage('Account created! Redirecting...', 'success');
-        setTimeout(() => {
-          if (role === 'user') window.location.href = 'user-dashboard.html';
-          else window.location.href = 'parent-dashboard.html';
-        }, 1500);
-      } catch (error) {
-        showMessage(error.message, 'error');
-      }
-    });
-
-function showMessage(text, type) {
-  const msg = document.getElementById('message');
-  msg.textContent = text;
-  msg.className = `alert alert-${type}`;
-}
   </script>
+
 </body>
 </html>
